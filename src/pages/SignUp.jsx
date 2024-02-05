@@ -6,77 +6,28 @@ import { HiOutlineChevronLeft } from "react-icons/hi";
 import logo from "./images/logo.png";
 import authBg from "./images/bg-auth.jpg";
 import dashMockup from "./images/dash-mockup.jpg";
-
+import { userSchema } from './validations/UserValidation.jsx';
+// import Error from './components/Error';
+import { useFormik } from 'formik';
+const initialValues = {
+  fname: "",
+  lname: "",
+  email: "",
+  password: "",
+  cpassword: "",
+}
 const SignUp = () => {
-  const [formData, setFormData] = useState({
-    fname: "",
-    lname: "",
-    email: "",
-    password: "",
-    cpassword: "",
-    agree: false,
+  const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
+    initialValues: initialValues,
+    validationSchema: userSchema,
+    onSubmit: (values) => {
+
+      console.log(values);
+    }
   });
 
-  const handleChange = (e) => {
-    const { id, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Validate passwords match
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(formData.password)) {
-        throw new Error(
-          "Password Requires at least one lowercase letter,uppercase letter, special character, and number."
-        );
-      }
-      if (formData.password !== formData.cpassword) {
-        throw new Error("Passwords do not match");
-      }
-      const nameRegex = /^[A-Za-z]+$/;
-      if (!nameRegex.test(formData.fname) || !nameRegex.test(formData.lname)) {
-        throw new Error("Only alphabets are allowed for First Name and Last Name.");
-      }
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        data: {
-          first_name: formData.fname,
-          last_name: formData.lname,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-      alert("Check your email for a verification link");
-    } catch (error) {
-      alert(error);
-    }
-
-    const { data, error: insertError } = await supabase.from("users").upsert(
-      [
-        {
-          firstname: formData.fname,
-          lastname: formData.lname,
-          email: formData.email,
-          password: formData.password,
-        },
-      ],
-      { onConflict: ["email"] }
-    );
-
-    if (insertError) {
-      throw insertError;
-    }
-  };
-
+ 
+ 
   return (
     <>
       <div className="grid sm:grid-cols-2 ">
@@ -101,39 +52,51 @@ const SignUp = () => {
                   <Label htmlFor="fname" value="First Name" />
                 </div>
                 <TextInput
+                placeholder="First Name"
                   id="fname"
                   type="text"
                   required
                   shadow
-                  value={formData.fname}
+                  value={values.fname}
                   onChange={handleChange}
+                  onBlur={handleBlur} 
                 />
+                        {errors.fname && touched.fname ? <p style={{ 'color': "red" }}>{errors.fname}</p> : null}
+
               </div>
               <div>
                 <div className="mb-2 block">
                   <Label htmlFor="lname" value="Last Name" />
                 </div>
                 <TextInput
+                placeholder="Last Name"
                   id="lname"
                   type="text"
                   required
                   shadow
-                  value={formData.lname}
+                  value={values.lname}
                   onChange={handleChange}
+                  onBlur={handleBlur} 
                 />
+                        {errors.lname && touched.lname ? <p style={{ 'color': "red" }}>{errors.lname}</p> : null}
+
               </div>
               <div>
                 <div className="mb-2 block">
                   <Label htmlFor="email2" value="Email address" />
                 </div>
                 <TextInput
+                placeholder="Email address"
                   id="email"
                   type="email"
                   required
                   shadow
-                  value={formData.email}
+                  value={values.email}
                   onChange={handleChange}
+                  onBlur={handleBlur} 
                 />
+                        {errors.email && touched.email ? <p style={{ 'color': "red" }}>{errors.email}</p> : null}
+
               </div>
               <div>
                 <div className="mb-2 block">
@@ -141,13 +104,16 @@ const SignUp = () => {
                 </div>
                 <div className="">
                   <TextInput
+                  placeholder="Enter your password"
                     id="password"
                     type="password"
                     required
                     shadow
-                    value={formData.password}
+                    value={values.password}
                     onChange={handleChange}
                   />
+                          {errors.password && touched.password ? <p style={{ 'color': "red" }}>{errors.password}</p> : null}
+
                 </div>
               </div>
               <div>
@@ -156,18 +122,21 @@ const SignUp = () => {
                 </div>
                 <div className="">
                   <TextInput
+                  placeholder="Confirm Password"
                     id="cpassword"
                     type="password"
                     required
                     shadow
-                    value={formData.cpassword}
+                    value={values.cpassword}
                     onChange={handleChange}
                   />
+                          {errors.cpassword && touched.cpassword ? <p style={{ 'color': "red" }}>{errors.cpassword}</p> : null}
+
                 </div>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center">
-                  <Checkbox id="agree" checked={formData.agree} onChange={handleChange} />
+                  <Checkbox id="agree"  onChange={handleChange} />
                   <Label htmlFor="agree" className="flex ms-2">
                     Remember me
                   </Label>
